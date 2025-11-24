@@ -52,36 +52,36 @@ Architecture (node graph) — Mermaid:
 
 ```mermaid
 graph LR
-	subgraph Devices
-		Lamp[Lamp Thread]
-		Thermo[Thermostat Thread]
-		AC[AC Thread]
-		TV[TV Thread]
-		Camera[Camera Threads]
-		Gate[Smart Gate Thread]
-	end
+  subgraph Devices
+    Lamp[Lamp]
+    Thermo[Thermostat]
+    AC[AC]
+    TV[TV]
+    Camera[Cameras]
+    Gate[Gate]
+  end
 
-	MQTT[MQTT Broker (Mosquitto)]
+  MQTT[Broker]
 
-	subgraph Backend
-		MqttClient[MQTT Client]
-		DeviceMgr[DeviceManager]
-		API[FastAPI REST API]
-		WS[WebSocket /ws]
-	end
+  subgraph Backend
+    MqttClient[MQTT]
+    DeviceMgr[DeviceMgr]
+    API[API]
+    WS[WS]
+  end
 
-	UI[React UI]
+  UI[UI]
 
-	Devices -->|publish status| MQTT
-	UI -->|REST /api/*| API
-	API -->|publish cmd| MQTT
-	MQTT -->|deliver| MqttClient
-	MqttClient --> DeviceMgr
-	MqttClient --> WS
-	WS <--> UI
-	DeviceMgr <--> API
+  Devices -->|status| MQTT
+  UI -->|REST| API
+  API -->|cmd| MQTT
+  MQTT -->|deliver| MqttClient
+  MqttClient --> DeviceMgr
+  MqttClient --> WS
+  WS <--> UI
+  DeviceMgr <--> API
 
-	%% Note: removed custom style directives to improve GitHub Mermaid compatibility
+  %% GitHub-compatible Mermaid: concise labels and no custom styles
 ```
 
 Architecture (ASCII fallback):
@@ -103,22 +103,22 @@ Sequence / Flow (runtime) — Mermaid sequence diagram:
 
 ```mermaid
 sequenceDiagram
-	participant D as Device Thread
-	participant B as MQTT Broker
-	participant S as Backend (FastAPI)
-	participant W as WebSocket Clients (UI)
-	participant U as UI (React)
+  participant D as Device
+  participant B as Broker
+  participant S as Backend
+  participant W as WSClients
+  participant U as UI
 
-	D->>B: publish status (home/{type}/{id}/status)
-	B->>S: deliver message (backend MQTT client subscribed)
-	S->>S: update DeviceManager state
-	S->>W: broadcast status/event on /ws
-	W->>U: UI receives real-time update
+  D->>B: publish status
+  B->>S: deliver message
+  S->>S: update DeviceMgr
+  S->>W: broadcast on /ws
+  W->>U: UI receives update
 
-	U->>S: POST /api/device/control (user action)
-	S->>B: publish command (home/{type}/{id}/cmd)
-	B->>D: deliver command to device
-	D->>B: device executes and publishes new status
+  U->>S: POST /api/device/control
+  S->>B: publish cmd
+  B->>D: deliver cmd
+  D->>B: publish result/status
 
 ```
 
