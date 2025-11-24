@@ -7,6 +7,139 @@ This repository contains a minimal IoT Home Automation prototype using MQTT for 
 - Backend provides REST endpoints and an optional WebSocket broadcaster.
 - UI can control devices and (optionally) receive real-time updates.
 
+## Workflow & Data Flow
+
+This section explains how the pieces fit together and the expected runtime flow.
+
+- **Components**:
+	- Mosquitto MQTT broker: handles publish/subscribe for all devices and backend.
+	- Backend (FastAPI): runs `backend.api.main`, manages device threads via `DeviceManager`, subscribes/publishes MQTT, exposes REST and a WebSocket endpoint.
+	- Devices (simulated device modules): individual Python modules (lamp, thermostat, AC, TV, cameras, smart_gate) run as threads and communicate only via MQTT topics.
+	- UI (React): fetches device list via REST, can send control requests to the backend, and optionally connects to the backend WebSocket for live updates.
+
+- **Topic conventions** (used throughout the project):
+	- Status/telemetry: `home/{device_type}/{device_id}/status`
+	- Commands: `home/{device_type}/{device_id}/cmd`
+	- Events/alerts: `home/{device_type}/{device_id}/event`
+
+- **Runtime data flow**:
+	1. Device thread publishes telemetry or status updates to its `home/.../status` topic.
+	2. The backend's MQTT client receives these messages (it subscribes to the relevant wildcard topics) and:
+		 - updates internal `DeviceManager` state,
+		 - optionally broadcasts the message to connected WebSocket clients (`/ws`) for real-time UI updates.
+	3. The UI initially fetches `GET /api/devices` (REST) to populate the view. In Manual mode it only updates on `Refresh`; in Real-time mode it opens a WS connection to receive messages pushed from the backend.
+	4. When a user sends a control action from the UI, the frontend calls `POST /api/device/control`. The backend validates the request and publishes a command on `home/{device_type}/{device_id}/cmd`.
+	5. The corresponding device (or a simulated device thread) receives the command via MQTT and performs the action, publishing any resulting status back to `home/.../status`.
+
+- **Startup order (recommended)**:
+	1. Ensure Mosquitto is running.
+	2. Start the backend (from the repo root so Python can import the `backend` package):
+		 - create/activate venv and `pip install -r backend/requirements.txt`, then run `uvicorn backend.api.main:app`.
+	3. Start the UI:
+		 - Development: `npm start` (dev server proxies `/api` to backend), or
+		 - Production: `npm run build` and serve `ui/build` from a server that proxies `/api` to `http://127.0.0.1:8000`, or run the backend-mounted static files (see Troubleshooting/Notes below).
+
+- **Notes & troubleshooting**:
+	- The Create React App dev server uses the `proxy` in `ui/package.json` to forward `/api` to the backend; a static build served directly (e.g., `npx serve -s build`) will not forward `/api` and therefore must either be proxied by a webserver or built with an explicit API base URL.
+	- If you see `ModuleNotFoundError: No module named 'backend'`, make sure you ran `uvicorn` from the repository root (not from `backend/`).
+	- If the UI shows "No devices found" when served statically, check the Network tab in the browser devtools and inspect the `/api/devices` request — it often means the UI cannot reach the backend due to same-origin/proxy issues.
+
+### Architecture diagrams
+
+Below are two representations of the system: a node-style architecture diagram (components and connections) and a sequence/flow diagram (runtime message flow). The diagrams are provided as Mermaid blocks (rendered on platforms that support Mermaid) plus a simple ASCII fallback so they're readable everywhere.
+
+Architecture (node graph) — Mermaid:
+
+```mermaid
+graph LR
+	subgraph Devices
+		Lamp[Lamp Thread]
+		Thermo[Thermostat Thread]
+		AC[AC Thread]
+		TV[TV Thread]
+		Camera[Camera Threads]
+		Gate[Smart Gate Thread]
+	end
+
+	MQTT[MQTT Broker<br/>(Mosquitto)]
+
+	subgraph Backend
+		MqttClient[MQTT Client]
+		DeviceMgr[DeviceManager]
+		API[FastAPI REST API]
+		WS[WebSocket /ws]
+	end
+
+	UI[React UI]
+
+	Devices -->|publish status| MQTT
+	UI -->|REST /api/*| API
+	API -->|publish cmd| MQTT
+	MQTT -->|deliver| MqttClient
+	MqttClient --> DeviceMgr
+	MqttClient --> WS
+	WS <--> UI
+	DeviceMgr <--> API
+
+	style MQTT fill:#fffae6,stroke:#f6c84c
+	style Backend fill:#f0f8ff,stroke:#66a3ff
+	style UI fill:#e8ffe8,stroke:#2da44e
+```
+
+Architecture (ASCII fallback):
+
+```
+	[Devices] --publish status--> [MQTT Broker]
+														 ^
+														 |
+												 subscribe
+														 |
+	[React UI] <--ws/ws--> [Backend MQTT Client + WS + API] <---> [DeviceManager]
+			 |                         ^                          
+			 |--REST /api/*----------> |                          
+																|                          
+													 [MQTT Broker] --deliver cmd--> [Devices]
+```
+
+Sequence / Flow (runtime) — Mermaid sequence diagram:
+
+```mermaid
+sequenceDiagram
+	participant D as Device Thread
+	participant B as MQTT Broker
+	participant S as Backend (FastAPI)
+	participant W as WebSocket Clients (UI)
+	participant U as UI (React)
+
+	D->>B: publish status (home/{type}/{id}/status)
+	B->>S: deliver message (backend MQTT client subscribed)
+	S->>S: update DeviceManager state
+	S->>W: broadcast status/event on /ws
+	W->>U: UI receives real-time update
+
+	U->>S: POST /api/device/control (user action)
+	S->>B: publish command (home/{type}/{id}/cmd)
+	B->>D: deliver command to device
+	D->>B: device executes and publishes new status
+
+```
+
+Sequence / Flow (ASCII fallback):
+
+```
+	Device -> MQTT Broker : status
+	MQTT Broker -> Backend MQTT Client : message
+	Backend -> DeviceManager : update internal state
+	Backend -> WebSocket clients : broadcast message
+	Web UI : receives message and updates view
+
+	Web UI -> Backend : POST /api/device/control
+	Backend -> MQTT Broker : publish cmd
+	MQTT Broker -> Device : deliver cmd
+	Device -> MQTT Broker : publish result/status
+```
+
+
 ---
 
 ## Run steps (step-by-step)
