@@ -105,6 +105,22 @@ Sequence / Flow (runtime) — Mermaid sequence diagram:
 sequenceDiagram
 	participant D as Device Thread
 	participant B as MQTT Broker
+Architecture (rendered image)
+
+![Architecture diagram](docs/architecture.svg)
+
+Architecture (PNG fallback)
+
+![Architecture diagram PNG](docs/architecture.png)
+
+Sequence / Flow (rendered image)
+
+![Sequence diagram](docs/sequence.svg)
+
+Sequence (PNG fallback)
+
+![Sequence diagram PNG](docs/sequence.png)
+
 	participant S as Backend (FastAPI)
 	participant W as WebSocket Clients (UI)
 	participant U as UI (React)
@@ -135,6 +151,24 @@ Sequence / Flow (ASCII fallback):
 	Backend -> MQTT Broker : publish cmd
 	MQTT Broker -> Device : deliver cmd
 	Device -> MQTT Broker : publish result/status
+```
+
+### Communication Flow (rendered)
+
+![MQTT communication flow](docs/comm_flow.svg)
+
+Communication Flow (PNG fallback)
+
+![MQTT communication flow PNG](docs/comm_flow.png)
+
+Communication flow (text summary / ASCII):
+
+```
+Publisher -> Broker : PUBLISH home/{type}/{id}/status (QoS, retained)
+Broker -> Subscribers : deliver to matching subscriptions (wildcards supported)
+Subscriber -> (on_message) : process payload, optionally PUBLISH ACK/event back to Broker
+UI/API -> Broker : PUBLISH home/{type}/{id}/cmd to command device
+Broker -> Device : deliver CMD -> Device executes and PUBLISHes status
 ```
 
 

@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="640" viewBox="0 0 1200 640">
+  <style>
+    .lane { fill:#f7f7f7; stroke:#ddd; }
+    .label { font-family: Arial, Helvetica, sans-serif; font-size:13px; }
+    .title { font-family: Arial, Helvetica, sans-serif; font-size:16px; font-weight:700 }
+    .arrow { stroke:#333; stroke-width:1.5; marker-end:url(#arrowhead) }
+    .box { fill:#fff; stroke:#aaa; stroke-width:1 }
+  </style>
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#333" />
+    </marker>
+  </defs>
+
+  <text x="24" y="40" class="title">Sequence: runtime flow</text>
+
+  <!-- Lanes (spaced horizontally) -->
+  <rect x="40" y="80" width="200" height="420" class="lane" />
+  <text x="70" y="110" class="label">Device</text>
+
+  <rect x="300" y="80" width="200" height="420" class="lane" />
+  <text x="340" y="110" class="label">Broker</text>
+
+  <rect x="560" y="80" width="240" height="420" class="lane" />
+  <text x="600" y="110" class="label">Backend</text>
+
+  <rect x="840" y="80" width="220" height="420" class="lane" />
+  <text x="880" y="110" class="label">WS Clients</text>
+
+  <rect x="1080" y="80" width="200" height="420" class="lane" />
+  <text x="1100" y="110" class="label">UI</text>
+
+  <!-- Messages (arrows) with more vertical spacing -->
+  <!-- Device -> Broker -->
+  <path d="M240 180 L300 180" class="arrow" />
+  <text x="250" y="168" class="label">Publish</text>
+
+  <!-- Broker -> Backend (deliver) -->
+  <path d="M500 220 L560 220" class="arrow" />
+  <text x="460" y="208" class="label">Deliver</text>
+
+  <!-- Backend internal update (vertical) -->
+  <rect x="640" y="260" width="60" height="34" class="box" />
+  <text x="648" y="283" class="label">Update</text>
+
+  <!-- Backend -> WebSocket -->
+  <path d="M800 300 L840 300" class="arrow" />
+  <text x="810" y="288" class="label">Broadcast</text>
+
+  <!-- WebSocket -> Browser -->
+  <path d="M980 320 L1080 320" class="arrow" />
+  <text x="1020" y="308" class="label">UI update</text>
+
+  <!-- UI control flow back to backend and broker (downstream) -->
+  <path d="M1120 400 L1080 400" class="arrow" />
+  <text x="980" y="388" class="label">Control</text>
+
+  <path d="M860 440 L760 440" class="arrow" />
+  <text x="810" y="428" class="label">Publish cmd</text>
+
+  <path d="M620 480 L560 480" class="arrow" />
+  <text x="600" y="468" class="label">Deliver cmd</text>
+
+  <path d="M360 520 L300 520" class="arrow" />
+  <text x="340" y="508" class="label">Exec & status</text>
+
+  <text x="24" y="600" class="label">Sequence diagram</text>
+</svg>

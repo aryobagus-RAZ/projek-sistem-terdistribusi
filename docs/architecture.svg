@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="640" viewBox="0 0 1200 640">
+  <style>
+    .box { fill:#f0f8ff; stroke:#2b6cb0; stroke-width:1.5; rx:8; ry:8 }
+    .small { fill:#fff; stroke:#888; stroke-width:1; rx:6; ry:6 }
+    .mqtt { fill:#fff7e6; stroke:#f6c84c; stroke-width:1.5 }
+    .ui { fill:#e8ffe8; stroke:#2da44e; stroke-width:1.5 }
+    .label { font-family: Arial, Helvetica, sans-serif; font-size:14px; }
+    .title { font-family: Arial, Helvetica, sans-serif; font-size:16px; font-weight:700 }
+    .arrow { stroke:#444; stroke-width:1.6; marker-end:url(#arrowhead) }
+  </style>
+
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#444" />
+    </marker>
+  </defs>
+
+  <!-- Title -->
+  <text x="24" y="36" class="title">Architecture: IoT Home Dashboard</text>
+
+  <!-- Devices group (left) -->
+  <g transform="translate(30,80)">
+    <rect x="0" y="0" width="320" height="220" class="box" />
+    <text x="16" y="30" class="label">Devices</text>
+
+    <!-- Device items spaced vertically -->
+    <rect x="18" y="48" width="140" height="34" class="small" />
+    <text x="30" y="72" class="label">Lamp</text>
+
+    <rect x="18" y="92" width="140" height="34" class="small" />
+    <text x="30" y="116" class="label">Thermostat</text>
+
+    <rect x="18" y="136" width="140" height="34" class="small" />
+    <text x="30" y="160" class="label">Camera</text>
+
+    <rect x="18" y="180" width="140" height="34" class="small" />
+    <text x="30" y="204" class="label">Smart Gate</text>
+  </g>
+
+  <!-- MQTT Broker (center-left) -->
+  <g transform="translate(400,120)">
+    <rect x="0" y="0" width="220" height="80" class="mqtt" />
+    <text x="16" y="36" class="label">MQTT Broker</text>
+  </g>
+
+  <!-- Backend (right) -->
+  <g transform="translate(680,60)">
+    <rect x="0" y="0" width="360" height="260" class="box" />
+    <text x="16" y="30" class="label">Backend</text>
+
+    <rect x="20" y="52" width="160" height="40" class="small" />
+    <text x="32" y="78" class="label">MQTT</text>
+
+    <rect x="200" y="52" width="140" height="40" class="small" />
+    <text x="212" y="78" class="label">Manager</text>
+
+    <rect x="20" y="112" width="160" height="40" class="small" />
+    <text x="32" y="138" class="label">REST</text>
+
+    <rect x="200" y="112" width="140" height="40" class="small" />
+    <text x="212" y="138" class="label">WebSocket</text>
+  </g>
+
+  <!-- UI (bottom center-right) -->
+  <g transform="translate(520,360)">
+    <rect x="0" y="0" width="280" height="100" class="ui" />
+    <text x="16" y="30" class="label">React UI</text>
+    <text x="16" y="54" class="label">Manual / Real-time</text>
+  </g>
+
+  <!-- Arrows (spaced and routed) -->
+  <path d="M350 200 L400 160" class="arrow" />
+  <text x="330" y="188" class="label">Publish</text>
+
+  <path d="M520 160 L680 160" class="arrow" />
+  <text x="600" y="150" class="label">Deliver</text>
+
+  <path d="M760 200 L820 200" class="arrow" />
+  <text x="788" y="190" class="label">Update</text>
+
+  <path d="M760 220 L600 380" class="arrow" />
+  <text x="680" y="300" class="label">Broadcast</text>
+
+  <path d="M560 420 L520 420" class="arrow" />
+  <text x="530" y="410" class="label">REST</text>
+
+  <!-- Legend / footer -->
+  <text x="20" y="620" class="label">Generated SVG diagram — architecture view</text>
+</svg>

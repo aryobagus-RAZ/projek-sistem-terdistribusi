@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="580" viewBox="0 0 1200 580">
+  <style>
+    .box { fill:#fff; stroke:#2b6cb0; stroke-width:1.6; rx:8; ry:8 }
+    .broker { fill:#fff7e6; stroke:#f6c84c; stroke-width:1.6 }
+    .label { font-family: Arial, Helvetica, sans-serif; font-size:14px; }
+    .title { font-family: Arial, Helvetica, sans-serif; font-size:18px; font-weight:700 }
+    .arrow { stroke:#333; stroke-width:1.6; marker-end:url(#arrowhead) }
+    .note { font-family: Arial, Helvetica, sans-serif; font-size:12px; fill:#555 }
+  </style>
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#333" />
+    </marker>
+  </defs>
+
+  <text x="24" y="48" class="title">MQTT Communication Flow</text>
+
+  <!-- Publisher (left) -->
+  <g transform="translate(40,100)">
+    <rect x="0" y="0" width="300" height="140" class="box" />
+    <text x="20" y="36" class="label">Publisher</text>
+    <text x="20" y="60" class="note">topic: home/{type}/{id}/status</text>
+    <rect x="20" y="100" width="140" height="30" class="box" />
+    <text x="36" y="120" class="label">PUBLISH</text>
+  </g>
+
+  <!-- Broker (center) -->
+  <g transform="translate(420,100)">
+    <rect x="0" y="0" width="360" height="180" class="broker" />
+    <text x="20" y="36" class="label">Broker</text>
+    <text x="20" y="64" class="note">routes to subscribers</text>
+
+    <rect x="20" y="120" width="160" height="36" class="box" />
+    <text x="36" y="146" class="label">STORE / ROUTE</text>
+  </g>
+
+  <!-- Subscriber / Device (right) -->
+  <g transform="translate(940,100)">
+    <rect x="0" y="0" width="300" height="180" class="box" />
+    <text x="20" y="36" class="label">Subscriber</text>
+    <text x="20" y="60" class="note">subscribe to topics</text>
+    <rect x="20" y="120" width="140" height="36" class="box" />
+    <text x="36" y="148" class="label">SUBSCRIBE</text>
+    <rect x="20" y="160" width="140" height="36" class="box" />
+    <text x="36" y="188" class="label">ON MESSAGE</text>
+  </g>
+
+  <!-- Arrows: Publisher -> Broker -> Subscriber -->
+  <path d="M360 180 L420 170" class="arrow" />
+  <text x="370" y="162" class="label">PUBLISH</text>
+
+  <path d="M780 190 L940 190" class="arrow" />
+  <text x="800" y="182" class="label">DELIVER</text>
+
+  <!-- Control flow (back) -->
+  <path d="M1040 260 L780 320" class="arrow" />
+  <text x="840" y="280" class="label">ACK / Event</text>
+
+  <path d="M620 360 L320 400" class="arrow" />
+  <text x="420" y="372" class="label">Route CMD</text>
+
+  <!-- Footer notes -->
+  <text x="20" y="540" class="note">Summary: Publisher -> Broker -> Subscriber. Commands: UI/API -> Broker -> Device (CMD).</text>
+
+</svg>
