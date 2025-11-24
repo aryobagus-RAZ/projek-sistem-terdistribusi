@@ -27,28 +27,66 @@ MQTT dipilih karena sangat efisien, menjadikannya pilihan ideal untuk perangkat 
 
 ---
 
-## Latar Belakang dan Permasalahan
+## Gambaran Umum
 
-Sistem rumah pintar lama dan beberapa implementasi MQTT saat ini punya tiga masalah besar:
-
-### 1. Jangkauan Terbatas
-Sistem otomasi rumah lama (seperti yang pakai RFID dan inframerah) terbatas pada jangkauan operasional sekitar 10 meter dan harus tanpa penghalang (*line-of-sight*).
-* **Dampaknya:** Keterbatasan fisik ini menghambat cakupan seluruh rumah (terutama rumah bertingkat) dan menghilangkan peluang pembentukan jaringan sensor terdistribusi.
-
-### 2. Jaringan Rawan Mati (*Single Point of Failure* - SPOF)
-Topologi *client-broker-server* dalam MQTT menimbulkan SPOF.
-* **Dampaknya:** Ketika broker tidak tersedia—karena gangguan jaringan atau *crash server*—seluruh sistem otomasi menjadi tidak berfungsi.
+* **publisher.py:**
+Kode ini mensimulasikan lima sensor secara virtual yaitu suhu, kelembaban, gerakan, cahaya dan pintu. Setiap sensor secara periodik mem-publish pesan JSON ke topik seperti `home/livingroom/temperature` dan mendengarkan acknowledgement pada topik `ack/<sensor_id>`
+* **dashboard.py:**
+Kode ini merupakan subscriber ke topik sensor, dan juga mengirim pesan acknowledgement kembali ke setiap sensor. Dashboard ini menggunakan framework Flask untuk membangun aplikasi website.
 
 ---
 
-## Usulan Solusi
+## Fitur Tambahan
 
-Kami merancang solusi untuk mengatasi tiga masalah di atas:
+Dashboard menampilkan langsung data terbaru serta timestamp yang dikirimkan dari lima sensor.
+Terdapat juga `Event Log` yang menunjukkan peristiwa terstruktur dengan arah, sehingga pembaca dapat melacak pesan yang dikirim.
 
-### A. Jaringan Lebih Kuat & Tahan Mati
-Untuk mengatasi masalah pada point **1** dan **2**:
-
-* Kami akan menambahkan fitur **pengecekan kesehatan (*health check*)** dan **sambung ulang otomatis (*auto reconnect*)** untuk memastikan perangkat mencoba terhubung kembali ke broker jika putus.
-* Kami akan memprioritaskan topik-topik penting (*relay*) agar disinkronkan terlebih dahulu untuk menjaga fungsionalitas utama.
 
 ---
+
+## Desain dan Arsitektur
+
+* **Broker:**
+Broker MQTT yang digunakan adalah Mosquitto dengan fungsi untuk menangani pesan yang dikirim dari publisher dan subscriber.
+* **Struktur Topik:**
+    -  Data Sensor: `home/<room>/<sensor>` (contoh: `home/livingroom/temperature`)
+    - Acknowledgement: `ack/<sensor-id>` (contoh: `ack/livingroom-temperature-abc123`)
+* **Alur Pesan:**
+    1. `publisher` ke `broker` (publish data sensor)
+    2. `broker` ke `subsciber` (dashboard (sebagai subscriber) menerima pesan)
+    3. `subscriber` ke `broker` (dashboard mempublish `ack` ke `ack/<sensor-id>`)
+    4. `broker` ke `publisher` (publisher menerima `ack`)
+
+---
+
+## Getting Started
+
+1. Install dan Jalankan Broker MQTT Mosquitto
+- Download Mosquitto dari https://mosquitto.org/download/ atau instal melalui Chocolatey: `choco install mosquitto`
+- Jalankan broker menggunakan port default (1883)
+
+```powershell
+mosquitto -v
+```
+
+2. Install dependensi serta siapkan lingkungan Python
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+```
+
+3. Jalankan Dashboard (subsciber + web UI)
+
+```powershell
+python dashboard.py --broker localhost --port 1883 --host 0.0.0.0 --webport 5000
+```
+
+4. Jalankan Publisher
+
+```powershell
+python publisher.py --broker localhost --port 1883
+```
+
+5. Buka web `http://localhost:5000` pada browser untuk melihat langsung aktivitas sensornya
