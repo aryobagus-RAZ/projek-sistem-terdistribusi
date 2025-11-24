@@ -105,22 +105,6 @@ Sequence / Flow (runtime) — Mermaid sequence diagram:
 sequenceDiagram
 	participant D as Device Thread
 	participant B as MQTT Broker
-Architecture (rendered image)
-
-![Architecture diagram](docs/architecture.svg)
-
-Architecture (PNG fallback)
-
-![Architecture diagram PNG](docs/architecture.png)
-
-Sequence / Flow (rendered image)
-
-![Sequence diagram](docs/sequence.svg)
-
-Sequence (PNG fallback)
-
-![Sequence diagram PNG](docs/sequence.png)
-
 	participant S as Backend (FastAPI)
 	participant W as WebSocket Clients (UI)
 	participant U as UI (React)
@@ -137,6 +121,23 @@ Sequence (PNG fallback)
 	D->>B: device executes and publishes new status
 
 ```
+
+	Architecture (rendered image)
+
+	![Architecture diagram](docs/architecture.svg)
+
+	Architecture (PNG fallback)
+
+	![Architecture diagram PNG](docs/architecture.png)
+
+	Sequence / Flow (rendered image)
+
+	![Sequence diagram](docs/sequence.svg)
+
+	Sequence (PNG fallback)
+
+	![Sequence diagram PNG](docs/sequence.png)
+
 
 Sequence / Flow (ASCII fallback):
 
