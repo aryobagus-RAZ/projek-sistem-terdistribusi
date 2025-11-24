@@ -154,13 +154,9 @@ Sequence / Flow (ASCII fallback):
 	Device -> MQTT Broker : publish result/status
 ```
 
-### Communication Flow (rendered)
+### Communication Flow
 
-![MQTT communication flow](docs/comm_flow.svg)
-
-Communication Flow (PNG fallback)
-
-![MQTT communication flow PNG](docs/comm_flow.png)
+![MQTT communication flow](docs/comm_flow.png)
 
 Communication flow (text summary / ASCII):
 
