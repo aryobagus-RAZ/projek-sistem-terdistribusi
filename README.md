@@ -61,7 +61,7 @@ graph LR
 		Gate[Smart Gate Thread]
 	end
 
-	MQTT[MQTT Broker<br/>(Mosquitto)]
+	MQTT[MQTT Broker (Mosquitto)]
 
 	subgraph Backend
 		MqttClient[MQTT Client]
@@ -81,9 +81,7 @@ graph LR
 	WS <--> UI
 	DeviceMgr <--> API
 
-	style MQTT fill:#fffae6,stroke:#f6c84c
-	style Backend fill:#f0f8ff,stroke:#66a3ff
-	style UI fill:#e8ffe8,stroke:#2da44e
+	%% Note: removed custom style directives to improve GitHub Mermaid compatibility
 ```
 
 Architecture (ASCII fallback):
