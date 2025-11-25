@@ -1,15 +1,3 @@
-"""
-dashboard.py
-
-Runs an MQTT subscriber that listens to all sensor topics, sends ack messages
-back to sensor-specific ack topics, and exposes a small Flask web UI that shows
-live readings via Server-Sent Events (SSE).
-
-Usage (after installing requirements):
-  python dashboard.py --broker localhost --port 1883 --host 0.0.0.0 --webport 5000
-
-Open http://localhost:5000 in a browser.
-"""
 import argparse
 import json
 import queue
@@ -19,8 +7,6 @@ import uuid
 import importlib
 import pkgutil
 
-# Compatibility shim: ensure pkgutil.get_loader exists. Some environments (or a
-# local module named 'pkgutil') can shadow the stdlib and miss this helper.
 if not hasattr(pkgutil, 'get_loader'):
   def _get_loader(name):
     try:
@@ -36,15 +22,11 @@ if not hasattr(pkgutil, 'get_loader'):
 from flask import Flask, Response, stream_with_context, render_template_string
 import paho.mqtt.client as mqtt
 
-
 app = Flask(__name__)
 
-# Simple in-memory event queue for SSE
 event_q = queue.Queue()
 
-# store latest sensor values
 latest = {}
-
 
 SENSOR_TOPICS = [
     'home/livingroom/temperature',
@@ -54,12 +36,10 @@ SENSOR_TOPICS = [
     'home/entrance/door',
 ]
 
-
 def mqtt_on_connect(client, userdata, flags, rc):
     print('Connected to broker, rc=', rc)
     for t in SENSOR_TOPICS:
         client.subscribe(t)
-    # subscribe to ack topics to observe ack deliveries back to publishers
     client.subscribe('ack/#')
 
 
@@ -72,32 +52,24 @@ def mqtt_on_message(client, userdata, msg):
   ts = int(time.time()*1000)
   topic = msg.topic
 
-  # If this is an ack topic, it's a broker delivery of an ack (subscriber->broker->publisher path)
   if topic.startswith('ack/'):
-    # broker -> (subscribers including publisher)
     event = {'direction': 'broker->publisher', 'topic': topic, 'payload': payload, 'ts': ts}
     event_q.put(event)
     print(f"[BROKER->PUBLISHER] {topic} -> {payload}")
     return
 
-  # Regular sensor topic: represent the two hops
-  # 1) publisher -> broker (publish)
   event_q.put({'direction': 'publisher->broker', 'topic': topic, 'payload': payload, 'ts': ts})
   print(f"[PUBLISH] {topic} -> {payload}")
 
-  # 2) broker -> subscriber (delivery to this dashboard)
   event_q.put({'direction': 'broker->subscriber', 'topic': topic, 'payload': payload, 'ts': ts, 'subscriber': 'dashboard'})
   print(f"[DELIVER] {topic} -> dashboard -> {payload}")
 
-  # store latest
   sensor_id = payload.get('sensor')
   latest[sensor_id] = payload
 
-  # send ack back
   ack_topic = f"ack/{sensor_id}"
   ack_msg = { 'origId': payload.get('id'), 'ts': int(time.time()*1000), 'from': 'dashboard' }
 
-  # publish and track mid to log broker acceptance
   info = client.publish(ack_topic, json.dumps(ack_msg))
   mid = None
   try:
@@ -105,7 +77,6 @@ def mqtt_on_message(client, userdata, msg):
   except Exception:
     mid = None
   if mid is not None:
-    # store pending publish details so on_publish can log them
     userdata['pending_publishes'][mid] = {'topic': ack_topic, 'payload': ack_msg, 'ts': int(time.time()*1000)}
 
   event_q.put({'direction': 'subscriber->broker', 'topic': ack_topic, 'payload': ack_msg, 'ts': int(time.time()*1000), 'publisher': 'dashboard'})
@@ -113,14 +84,12 @@ def mqtt_on_message(client, userdata, msg):
 
 
 def start_mqtt(broker, port):
-    # we attach a userdata dict to share state (pending publishes mapping)
     userdata = {'pending_publishes': {}}
     client = mqtt.Client(client_id=f"dashboard-{uuid.uuid4()}", userdata=userdata)
     client.user_data_set(userdata)
     client.on_connect = mqtt_on_connect
     client.on_message = mqtt_on_message
 
-    # on_publish: called when broker acknowledges receipt of a PUBLISH (server ack for QoS>0)
     def on_publish(c, u, mid):
         info = u['pending_publishes'].pop(mid, None)
         if info:
@@ -136,7 +105,6 @@ def start_mqtt(broker, port):
 
 @app.route('/')
 def index():
-    # simple page that opens EventSource and draws cards
     return render_template_string(INDEX_HTML)
 
 
@@ -253,7 +221,7 @@ def main():
 
     mqtt_client = start_mqtt(args.broker, args.port)
 
-    print(f"Starting Flask app on http://{args.host}:{args.webport}")
+    print(f"starting Flask app on http://{args.host}:{args.webport}")
     app.run(host=args.host, port=args.webport, debug=False, threaded=True)
 
 

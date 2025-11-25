@@ -1,14 +1,3 @@
-"""
-publisher.py
-
-Simulates 5 home sensors (Temperature, Humidity, Motion, Light, Door)
-Each sensor publishes realistic random readings to MQTT topics and
-listens for acknowledgements on `ack/<sensor_id>`.
-
-Usage (after installing requirements):
-  python publisher.py --broker localhost --port 1883
-
-"""
 import argparse
 import json
 import random
@@ -18,7 +7,6 @@ import time
 import uuid
 
 import paho.mqtt.client as mqtt
-
 
 class Sensor(threading.Thread):
     def __init__(self, client, sensor_id, display_name, topic, interval, generator):
@@ -55,7 +43,8 @@ class Sensor(threading.Thread):
             message = { 'id': str(uuid.uuid4()), 'sensor': self.id, 'value': val, 'ts': int(time.time()*1000) }
             self.client.publish(self.topic, json.dumps(message))
             print(f"[PUBLISH] {self.topic} -> {message}")
-            # wait with small jitter
+            
+            # wait
             time.sleep(self.interval + random.uniform(-0.7, 0.7))
 
 
@@ -105,12 +94,12 @@ def main():
     for s in sensors:
         s.start()
 
-    print("Sensors started. Press Ctrl-C to stop.")
+    print("sensors started. press Ctrl-C to stop.")
     try:
         while True:
             time.sleep(1)
     except KeyboardInterrupt:
-        print("Stopping sensors...")
+        print("stopping sensors...")
         for s in sensors:
             s.stop()
         client.loop_stop()
