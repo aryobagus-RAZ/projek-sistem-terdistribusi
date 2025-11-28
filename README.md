@@ -40,7 +40,7 @@ Kode ini merupakan subscriber ke topik sensor, dan juga mengirim pesan acknowled
 
 Dashboard menampilkan langsung data terbaru serta timestamp yang dikirimkan dari lima sensor.
 Terdapat juga `Event Log` yang menunjukkan peristiwa terstruktur dengan arah, sehingga pembaca dapat melacak pesan yang dikirim.
-
+Pada Dashboard juga tersedia fitur berupa visual grafik untuk melihat tren nilai sensor dari waktu ke waktu.
 
 ---
 
