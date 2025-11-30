@@ -96,7 +96,7 @@ python publisher.py --broker localhost --port 1883
 ## Tampilan Program
 
 1. Lima sensor (suhu, kelembaban, cahaya, gerakan, pintu) sebagai publisher
-![5-publishers](https://i.imgur.com/sCOaI8N.png)
+![5-publishers]([https://i.imgur.com/sCOaI8N.png](https://imgur.com/a/y9FZjYg))
 2. Aktivitas pengiriman data antar publisher-broker-subscriber
 ![event-log](https://i.imgur.com/BLR8NKx.png)
 3. Alur data sensor dari publisher ke broker dan diterima subscriber dengan mekanisme konfirmasi (ACK)
